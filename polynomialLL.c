@@ -1,8 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-// p1: 7x^2 + 8x^1 + 7x^0 = 0
-// p2: 9x^5 + 3x^3 + 5x^1 + 1x^0 = 0
 
 typedef struct Term{
 	int exp;
@@ -38,25 +36,6 @@ void insertEnd(Polynomial* p,Term* t){
 	
 }
 
-// void insertSorted(Polynomial* p,Term* t){
-// 	if (p->head == NULL ||t->exp > p->head->exp){
-// 		t->next = p->head;
-// 		p->head = t;
-// 		return;
-// 	}
-// 	Term* lastEle = p->head;
-// 	while(lastEle->next && lastEle->next->exp>=t->exp){
-// 		printf("hai\n");
-// 		if(t->exp == lastEle->exp){
-// 			lastEle->coeff = lastEle->coeff+ t->coeff;
-// 			free(t);
-// 			return;
-// 		}
-// 		lastEle = lastEle->next;
-// 	}
-// 	t->next = lastEle->next;
-// 	lastEle->next = t;
-// }
 
 void insertSorted(Polynomial* p, Term* t) {
     // Empty list or new term’s exp > head’s exp → insert at head
@@ -114,6 +93,7 @@ Polynomial* sumOfPolynomial(Polynomial *p1,Polynomial *p2){
 		int coeff=p1_elements->coeff;
 		Term *new_term = createTerm(exp,coeff);
 		insertSorted(sum,new_term);
+		p1_elements = p1_elements->next;
 	}
 	Term *p2_elements =  p2->head;
 	while(p2_elements){
@@ -121,6 +101,7 @@ Polynomial* sumOfPolynomial(Polynomial *p1,Polynomial *p2){
 		int coeff=p2_elements->coeff;
 		Term *new_term = createTerm(exp,coeff);
 		insertSorted(sum,new_term);
+		p2_elements = p2_elements->next;
 	}
 	return sum;
 }
@@ -133,18 +114,20 @@ Polynomial* productOfPolynomial(Polynomial *p1,Polynomial *p2){
 		int outerCoeff=p1_elements->coeff;
 		Term *p2_elements =  p2->head;
 		while(p2_elements){
-			int exp=outerCoeff*p2_elements->exp;
-			int coeff=outerExp*p2_elements->coeff;
+		int exp = outerExp + p2_elements->exp;
+		int coeff = outerCoeff * p2_elements->coeff;	
 			Term *new_term = createTerm(exp,coeff);
 			insertSorted(product,new_term);
+			p2_elements = p2_elements->next;
 		}
+		p1_elements = p1_elements->next;
 	}
 	return 	product;
 	}
 void displayPolynomial(Polynomial* poly){
 	Term *element = poly->head;
 	int firstEle = 0;
-	while (1){
+	while (element){
 		if( firstEle == 1){
 			printf(" + ");
 		}
@@ -160,6 +143,15 @@ void displayPolynomial(Polynomial* poly){
 	printf(" = 0\n");
 }
 
+void freePolynomial(Polynomial* p) {
+    Term* current = p->head;
+    while (current) {
+        Term* next = current->next;
+        free(current);
+        current = next;
+    }
+    free(p);
+}
 
 int main(){
 	int p1_size,p2_size;
@@ -181,8 +173,12 @@ int main(){
 	displayPolynomial(sum);
 	printf("product: ");
 	displayPolynomial(product);
-	free(p1);
-	free(p2);
+	
+	freePolynomial(p1);
+  freePolynomial(p2);
+  freePolynomial(sum);
+  freePolynomial(product);
+
 	return 0;
 	
 }
